@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, jsonify
 from .models import Product, Category
 from .schemas import InfoQueryParams
 from .logger import logger
@@ -46,3 +46,19 @@ def info():
 """
 
     return Response(summary, mimetype="text/plain")
+
+@bp.route('/product/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return Response("Product not found", status=404)
+    # Пример сериализации (можно расширить)
+    data = {
+        "id": product.id,
+        "name": product.name,
+        "price": product.price,
+        "image_url": product.image_url,
+        "on_main": product.on_main,
+        "categories": [c.name for c in product.categories]
+    }
+    return jsonify(data)
